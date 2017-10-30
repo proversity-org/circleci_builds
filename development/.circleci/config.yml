@@ -87,6 +87,9 @@ jobs:
       - run:
           name: output install packages to console, help with debug
           command: 'pip freeze'
+      - run: 
+          name: test mongo is correct
+          command: 'mongo localhost:27017 /root/edx-platform/edx-platform/scripts/delete-mongo-test-dbs.js'
       - run:
           name: set mongo bindaddress
           command: |

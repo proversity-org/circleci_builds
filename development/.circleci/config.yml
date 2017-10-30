@@ -1,0 +1,99 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: ubuntu:artful-20171019
+    working_directory: ~/edx-platform
+    parallelism: 1
+    artifacts:
+      - "reports"
+      - "test_root/log"
+    steps:
+      - run:
+          name: apt-get update
+          command: 'DEBIAN_FRONTEND=noninteractive apt-get -y update'
+      - run:
+          name: install software-properties-common
+          command: 'DEBIAN_FRONTEND=noninteractive apt-get -y install software-properties-common'
+      - run:
+          name: set ppa
+          command: 'add-apt-repository ppa:ubuntu-toolchain-r/test'
+      - run:
+          name: apt-get update
+          command: 'DEBIAN_FRONTEND=noninteractive apt-get -y update'
+      - run:
+          name: install git
+          command: 'DEBIAN_FRONTEND=noninteractive apt-get -y install git'
+      - run:
+          name: checkout  repo
+          command: |
+            mkdir -p /root/edx-platform && cp -r /tmp/_circleci_local_build_repo/. /root/edx-platform
+            git clone https://github.com/proversity-org/edx-platform.git
+            cd edx-platform && git checkout proversity/development
+      - run:
+          name: install needed apt packages
+          command: 'cd edx-platform && DEBIAN_FRONTEND=noninteractive apt-get install -q -y $(cat requirements/system/ubuntu/apt-packages.txt)'
+      - run:
+          name: install nodejs
+          command: |
+            curl -sL https://deb.nodesource.com/setup_6.x -o nodesource_setup.sh
+            bash nodesource_setup.sh
+            apt-get -y install nodejs
+      - run:
+          name: do a apt-get upgrade
+          command: 'DEBIAN_FRONTEND=noninteractive apt-get -y upgrade'
+      - run:
+          name: nmp install
+          command: 'cd edx-platform && npm install'
+      - run:
+           name: set new compilers
+           command: 'update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-6 50 && update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-6 50'
+      - run:
+           name: install pip
+           command: 'easy_install pip'
+      - run:
+          name: pip install setuptools
+          command: 'pip install setuptools'
+      - run:
+          name: pip install Django.txt
+          command: 'cd edx-platform && pip install --exists-action w -r requirements/edx/django.txt'
+      - run:
+          name: pip install paver.txt
+          command: 'cd edx-platform && pip install --exists-action w -r requirements/edx/paver.txt'
+      - run:
+          name: install pre requirements
+          command: 'cd edx-platform && pip install --exists-action w -r requirements/edx/pre.txt'
+      - run:
+          name: install github requirements
+          command: 'cd edx-platform && pip install --exists-action w -r requirements/edx/github.txt'
+      - run:
+          name: install local requirements
+          command: 'cd edx-platform && pip install --exists-action w -r requirements/edx/local.txt'
+      - run:
+          name: install pbr
+          command: 'pip install  --exists-action w pbr==0.9.0'
+      - run:
+          name: install base requirements
+          command: 'cd edx-platform && pip install --exists-action w -r requirements/edx/base.txt'
+      - run:
+          name: install testing requirements
+          command: 'cd edx-platform && pip install --exists-action w -r requirements/edx/testing.txt'
+      - run:
+          name: install post if required
+          command: 'cd edx-platform && if [ -e requirements/edx/post.txt ]; then pip install --exists-action w -r requirements/edx/post.txt ; fi'
+      - run:
+          name: install coveralls
+          command: 'pip install coveralls==1.0'
+      - run:
+          name: output install packages to console, help with debug
+          command: 'pip freeze'
+      - run:
+          name: set mongo bindaddress
+          command: |
+            apt-get install --reinstall sed
+            sed -i -e 's/127.0.0.1/0.0.0.0/g' /etc/mongodb.conf
+            service mongodb restart
+      - run:
+          name: run all tests
+          command: 'cd edx-platform && /bin/bash ./scripts/all-tests.sh'
+          no_output_timeout: 20m

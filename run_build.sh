@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-
+set -o pipefail
 echo "Setting up for run"
 
 DOCKER_CHECK=$(sudo docker -v)

@@ -55,29 +55,32 @@ jobs:
           name: pip install setuptools
           command: 'pip install setuptools'
       - run:
-          name: pip install Django.txt
-          command: 'cd edx-platform && pip install --exists-action w -r requirements/edx/django.txt'
-      - run:
           name: install pre requirements
           command: 'cd edx-platform && pip install --exists-action w -r requirements/edx/pre.txt'
-      - run:
-          name: pip install paver.txt
-          command: 'cd edx-platform && pip install --exists-action w -r requirements/edx/paver.txt'
       - run:
           name: install github requirements
           command: 'cd edx-platform && pip install --exists-action w -r requirements/edx/github.txt'
       - run:
+          name: install local requirements
+          command: 'cd edx-platform && pip install --exists-action w -r requirements/edx/local.txt'
+      - run:
+          name: pip install Django.txt
+          command: 'cd edx-platform && pip install --exists-action w -r requirements/edx/django.txt'
+      - run:
           name: install base requirements
           command: 'cd edx-platform && pip install --exists-action w -r requirements/edx/base.txt'
+      - run:
+          name: pip install paver.txt
+          command: 'cd edx-platform && pip install --exists-action w -r requirements/edx/paver.txt'
+      - run:
+          name: install development requirements
+          command: 'cd edx-platform && pip install --exists-action w -r requirements/edx/development.txt'
       - run:
           name: install testing requirements
           command: 'cd edx-platform && pip install --exists-action w -r requirements/edx/testing.txt'
       - run:
-          name: install local requirements
-          command: 'cd edx-platform && pip install --exists-action w -r requirements/edx/local.txt'
-      - run:
           name: install pbr
-          command: 'pip install  --exists-action w pbr==0.9.0'
+          command: 'pip install  --exists-action w pbr'
       - run:
           name: install post if required
           command: 'cd edx-platform && if [ -e requirements/edx/post.txt ]; then pip install --exists-action w -r requirements/edx/post.txt ; fi'

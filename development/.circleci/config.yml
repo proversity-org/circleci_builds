@@ -1,9 +1,10 @@
 version: 2
 jobs:
   build:
-    docker:
-      - image: ubuntu:artful-20171019
-    working_directory: ~/edx-platform
+    machine:
+      python:
+        version: 2.7.10
+    working_directory: ~/edx-platform/edx-platform
     parallelism: 1
     artifacts:
       - "reports"
@@ -28,11 +29,11 @@ jobs:
           name: checkout  repo
           command: |
             mkdir -p /root/edx-platform && cp -r /tmp/_circleci_local_build_repo/. /root/edx-platform
-            git clone https://github.com/proversity-org/edx-platform.git
-            cd edx-platform && git checkout proversity/development
+            git clone https://github.com/proversity-org/edx-platform.git /root/edx-platform/edx-platform
+            git checkout proversity/development
       - run:
           name: install needed apt packages
-          command: 'cd edx-platform && DEBIAN_FRONTEND=noninteractive apt-get install -q -y $(cat requirements/system/ubuntu/apt-packages.txt)'
+          command: 'DEBIAN_FRONTEND=noninteractive apt-get install -q -y $(cat requirements/system/ubuntu/apt-packages.txt)'
       - run:
           name: install nodejs
           command: |
@@ -44,7 +45,7 @@ jobs:
           command: 'DEBIAN_FRONTEND=noninteractive apt-get -y upgrade'
       - run:
           name: nmp install
-          command: 'cd edx-platform && npm install'
+          command: 'npm install'
       - run:
            name: set new compilers
            command: 'update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-6 50 && update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-6 50'
@@ -56,34 +57,34 @@ jobs:
           command: 'pip install setuptools'
       - run:
           name: install pre requirements
-          command: 'cd edx-platform && pip install --exists-action w -r requirements/edx/pre.txt'
+          command: 'pip install --exists-action w -r requirements/edx/pre.txt'
       - run:
           name: install github requirements
-          command: 'cd edx-platform && pip install --exists-action w -r requirements/edx/github.txt'
+          command: 'pip install --exists-action w -r requirements/edx/github.txt'
       - run:
           name: install local requirements
-          command: 'cd edx-platform && pip install --exists-action w -r requirements/edx/local.txt'
+          command: 'pip install --exists-action w -r requirements/edx/local.txt'
       - run:
           name: pip install Django.txt
-          command: 'cd edx-platform && pip install --exists-action w -r requirements/edx/django.txt'
+          command: 'pip install --exists-action w -r requirements/edx/django.txt'
       - run:
           name: install base requirements
-          command: 'cd edx-platform && pip install --exists-action w -r requirements/edx/base.txt'
+          command: 'pip install --exists-action w -r requirements/edx/base.txt'
       - run:
           name: pip install paver.txt
-          command: 'cd edx-platform && pip install --exists-action w -r requirements/edx/paver.txt'
+          command: 'pip install --exists-action w -r requirements/edx/paver.txt'
       - run:
           name: install development requirements
-          command: 'cd edx-platform && pip install --exists-action w -r requirements/edx/development.txt'
+          command: 'pip install --exists-action w -r requirements/edx/development.txt'
       - run:
           name: install testing requirements
-          command: 'cd edx-platform && pip install --exists-action w -r requirements/edx/testing.txt'
+          command: 'pip install --exists-action w -r requirements/edx/testing.txt'
       - run:
           name: install pbr
           command: 'pip install  --exists-action w pbr'
       - run:
           name: install post if required
-          command: 'cd edx-platform && if [ -e requirements/edx/post.txt ]; then pip install --exists-action w -r requirements/edx/post.txt ; fi'
+          command: 'if [ -e requirements/edx/post.txt ]; then pip install --exists-action w -r requirements/edx/post.txt ; fi'
       - run:
           name: install coveralls
           command: 'pip install coveralls==1.0'

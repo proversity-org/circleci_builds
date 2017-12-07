@@ -21,6 +21,7 @@ fi
 echo "Setup done, running build for $1"
 
 cd ./$1
+sudo circleci update
 sudo circleci build
 
 echo "circle run complete exiting with code $?"
